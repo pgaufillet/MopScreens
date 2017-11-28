@@ -1574,7 +1574,7 @@
               else
                 txt_nb = length;
             }
-            r += '<th class="activeOnglet">' + phpTitle[panelIndex][c] + ' <span class="number_class">' + txt_nb + '</span></th>\r\n';
+            r += '<th class="activeOnglet">' + phpTitle[panelIndex][c] + ' <br/><span class="number_class">' + txt_nb + '</span></th>\r\n';
           }
           else
           {

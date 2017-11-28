@@ -59,6 +59,8 @@ foreach ($update->children() as $d) {
     processTeam($cmpId, $d);
   else if ($d->getName() == "cls")
     processClass($cmpId, $d);
+  else if ($d->getName() == "crs")
+      processCourse($cmpId, $d);
   else if ($d->getName() == "org")
     processOrganization($cmpId, $d);
   else if ($d->getName() == "ctrl")

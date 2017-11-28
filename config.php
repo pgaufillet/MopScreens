@@ -2,11 +2,11 @@
 
 // MySQL server configuration
 define("MYSQL_HOSTNAME", "localhost");
-define("MYSQL_USERNAME", "ToBeDefined");
-define("MYSQL_DBNAME", "ToBeDefined");
-define("MYSQL_PASSWORD", "ToBeDefined");
+define("MYSQL_USERNAME", "mopscreens");
+define("MYSQL_DBNAME", "mopscreens");
+define("MYSQL_PASSWORD", "5GuhVwM6bw2vdRmw");
 
-define("MEOS_PASSWORD", "ToBeDefined");
+define("MEOS_PASSWORD", "MopScreens");
 
 //Localization. NOTE: UTF-8 encoding required for non-latin characters
 $lang = array();

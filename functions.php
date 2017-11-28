@@ -28,13 +28,13 @@ function ConnectToDB() {
 }
 function redirectSwitchUsers()
 {
-  $ip=$_SERVER['REMOTE_ADDR'];
-  $ipnb=explode('.',$ip);
-  if (($ipnb[0]!='192')||($ipnb[1]!='168')||($ipnb[2]!='0')||($ipnb[3]=='20'))
-  {
-      header("Location: http://192.168.0.10/cfco/show.php");
-      exit;//die();
-  }
+//   $ip=$_SERVER['REMOTE_ADDR'];
+//   $ipnb=explode('.',$ip);
+//   if (($ipnb[0]!='192')||($ipnb[1]!='168')||($ipnb[2]!='0')||($ipnb[3]=='20'))
+//   {
+//       header("Location: http://192.168.0.10/cfco/show.php");
+//       exit;//die();
+//   }
 }
 function query($sql) {
 $link = ConnectToDB();
@@ -1196,7 +1196,7 @@ function clearCompetition($cid) {
    // may have side effects if some changes are made in MeOS classes for the competition, or if the cid is reused.
    // Well, wait and see...
    $link = ConnectToDB();
-   $tables = array(0=>"mopcontrol", "mopclass", "moporganization", "mopcompetition", "mopcompetitor",
+   $tables = array(0=>"mopcontrol", "mopclass", "mopcourse", "moporganization", "mopcompetition", "mopcompetitor",
                       "mopteam", "mopteammember", "mopclasscontrol", "mopradio");
    foreach($tables as $table) {
      $sql = "DELETE FROM $table WHERE cid=$cid";
@@ -1234,6 +1234,14 @@ function processClass($cid, $cls) {
     updateLinkTable("mopclasscontrol", $cid, $id, "ctrl", $radio);
   }
 }
+/** Update course table */
+function processCourse($cid, $crs) {
+  $link = ConnectToDB();
+  $id = mysqli_real_escape_string($link , $crs['id']);
+  $name = mysqli_real_escape_string($link , $crs);
+  $sqlupdate = "name='$name'";
+  updateTable("mopcourse", $cid, $id, $sqlupdate);
+}
 /** Update organization table */
 function processOrganization($cid, $org) {
   $link = ConnectToDB();
@@ -1250,11 +1258,12 @@ function processCompetitor($cid, $cmp) {
   $name = mysqli_real_escape_string($link, $base);
   $org = (int)$base['org'];
   $cls = (int)$base['cls'];
+  $crs = (int)$base['crs'];
   $stat = (int)$base['stat'];
   $st = (int)$base['st'];
   $rt = (int)$base['rt'];
   $now = time();
-  $sqlupdate = "name='$name', org=$org, cls=$cls, stat=$stat, st=$st, rt=$rt,timestamp=$now";
+  $sqlupdate = "name='$name', org=$org, cls=$cls, crs=$crs, stat=$stat, st=$st, rt=$rt,timestamp=$now";
   if (isset($cmp->input)) {
     $input = $cmp->input;
     $it = (int)$input['it'];

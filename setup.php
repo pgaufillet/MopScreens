@@ -28,10 +28,11 @@ function setupBaseCompetitor() {
   return " name VARCHAR(64) NOT NULL DEFAULT '',".
          " org INT NOT NULL DEFAULT 0,".
          " cls INT NOT NULL DEFAULT 0,".
+         " crs INT NOT NULL DEFAULT 0,".
          " stat TINYINT NOT NULL DEFAULT 0,".
          " st INT NOT NULL DEFAULT 0,".
          " rt INT NOT NULL DEFAULT 0,".
-         " INDEX(org), INDEX(cls),  INDEX(stat, rt), INDEX(st)";
+         " INDEX(org), INDEX(cls), INDEX(crs), INDEX(stat, rt), INDEX(st)";
 }
 
 function setup() {  
@@ -43,6 +44,12 @@ function setup() {
    			") ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci";
   query($sql);
   
+  $sql = "CREATE TABLE IF NOT EXISTS mopcourse (".
+      setupIddBase().
+      " name VARCHAR(64) NOT NULL DEFAULT ''".
+      ") ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci";
+      query($sql);
+      
   $sql = "CREATE TABLE IF NOT EXISTS mopclasscontrol (".
          " cid INT NOT NULL, id INT NOT NULL,".
          " leg TINYINT NOT NULL, ord TINYINT NOT NULL,".
