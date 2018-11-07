@@ -27,6 +27,7 @@
   $link = ConnectToDB();
 
   $cls = ((isset($_GET['cls'])) ? $_GET['cls'] : "0");
+  $crs = ((isset($_GET['crs'])) ? $_GET['crs'] : "0");
   $cmpId = ((isset($_GET['cmpId'])) ? $_GET['cmpId'] : "0");
   $leg = ((isset($_GET['leg'])) ? $_GET['leg'] : "0");
   $ord = ((isset($_GET['ord'])) ? $_GET['ord'] : "0");

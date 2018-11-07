@@ -29,6 +29,7 @@ define("CST_CONTENT_SUMMARY",6);
 define("CST_CONTENT_BLOG",7);
 define("CST_CONTENT_SLIDES",8);
 define("CST_CONTENT_RADIO",9);
+define("CST_CONTENT_RESULT_COURSE", 10);
 
 define("CST_MODE_INDIVIDUAL",1);
 define("CST_MODE_RELAY", 2);

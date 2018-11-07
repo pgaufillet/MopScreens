@@ -201,9 +201,9 @@
       $text[42]['en']="Start list";
       $text[42]['sv']="Startlista";
       
-      $text[43]['fr']="Résultats";
-      $text[43]['en']="Results";
-      $text[43]['sv']="Resultat";
+      $text[43]['fr']="Résultats par catégorie";
+      $text[43]['en']="Results by class";
+      $text[43]['sv']="Resultat per klass";
       
       $text[44]['fr']="Catégories";
       $text[44]['en']="Classes";
@@ -485,7 +485,11 @@
       $text[113]['en']="Restart install mode";
       $text[113]['sv']="Restart install mode";
       
-
+      $text[114]['fr']="Résultats par circuit";
+      $text[114]['en']="Results by course";
+      $text[114]['sv']="Resultat per banor";
+      
+      
 
 return $text[$sentence][$_SESSION['CurrentLanguage']];
 

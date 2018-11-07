@@ -36,6 +36,7 @@
   class Panel {
     var $numpanel;
     var $classes;
+    var $courses;
     
     var $content;
     var $mode;
@@ -61,7 +62,7 @@
       $this->numpanel = $num;
     }
 
-    function Initialise($r,$cls)
+    function Initialise($r,$cls, $crs)
     {
       $this->content=$r['panel'.$this->numpanel.'content'];
       $this->mode=$r['panel'.$this->numpanel.'mode'];
@@ -83,101 +84,134 @@
       $this->radioctrl=$r['panel'.$this->numpanel.'radioctrl'];
       
       $this->classes = $cls;
+      $this->courses = $crs;
     }
   }
+    
+    // -----------------------------------------------------------------------------------
+$panel1 = new Panel(1);
+$panel2 = new Panel(2);
+$panel3 = new Panel(3);
+$panel4 = new Panel(4);
+$panels = array(
+    $panel1,
+    $panel2,
+    $panel3,
+    $panel4
+);
 
-  //-----------------------------------------------------------------------------------
-
-  $panel1 = new Panel(1);
-  $panel2 = new Panel(2);
-  $panel3 = new Panel(3);
-  $panel4 = new Panel(4);
-  $panels = array($panel1,$panel2,$panel3,$panel4); 
-
-  $arr_cls = array();
-  $sql = "SELECT rcid FROM resultconfig WHERE active=1";
-  $res = mysqli_query($link, $sql);
-  if (mysqli_num_rows($res) > 0)
-  {
+$arr_cls = array();
+$arr_crs = array();
+$sql = "SELECT rcid FROM resultconfig WHERE active=1";
+$res = mysqli_query($link, $sql);
+if (mysqli_num_rows($res) > 0) {
     $r = mysqli_fetch_array($res);
-    $rcid=$r['rcid'];
+    $rcid = $r['rcid'];
     
     $sql = "SELECT * FROM resultscreen WHERE rcid=$rcid AND sid=$screenIndex";
     $res = mysqli_query($link, $sql);
-    if (mysqli_num_rows($res) > 0)
-    {
-      // Recall user configuration
-      $r = mysqli_fetch_array($res);
-      $cid=$r['cid'];
-      $style=$r['style'];
-      $title=stripslashes($r['title']);
-      $titlesize=$r['titlesize'];
-      $titlecolor=$r['titlecolor'];
-      $subtitle=stripslashes($r['subtitle']);
-      $subtitlesize=$r['subtitlesize'];
-      $subtitlecolor=$r['subtitlecolor'];
-      $titleleftpict=$r['titleleftpict'];
-      $titlerightpict=$r['titlerightpict'];
-      $panelscount=$r['panelscount'];
-
-      for ($i=1; $i<=NB_PANEL; $i++)
-      {
-        $panels[$i-1]->Initialise($r, null);
-      }
-
-      $classPanels = array();
-      $classNamePanels = array();
-      $sql_classes = array(-1);
-      
-      for($i=0; $i<$panelscount; $i++)
-      {
-        if(($panels[$i]->content == CST_CONTENT_RESULT) || ($panels[$i]->content == CST_CONTENT_SUMMARY) || ($panels[$i]->content == CST_CONTENT_RADIO) || ($panels[$i]->content == CST_CONTENT_START))
-        {
-          //-----------------------------------------------------------------
-          // Class recollection
-          $sql = "SELECT id FROM resultclass WHERE cid=$cid AND rcid=$rcid AND sid=$screenIndex AND panel=".($i+1);
-          $res = mysqli_query($link, $sql);
-          if (mysqli_num_rows($res) > 0)
-          {
-            while ($r = mysqli_fetch_array($res))
-            {
-              $myid = $r['id'];
-              $classPanels[$i][] = $myid;
-              
-              $sql = "SELECT name FROM mopclass WHERE cid=$cid AND id=$myid";
-              $resname = mysqli_query($link, $sql);
-              if (mysqli_num_rows($resname) > 0)
-              {
-                if ($rname = mysqli_fetch_array($resname))
-                {
-                  $classNamePanels[$i][] = $rname['name'];
-                }
-                else
-                {
-                  $classNamePanels[$i][] = $myid;
-                }
-              }
-              else
-              {
-                  $classNamePanels[$i][] = $myid;
-              }
-            }
-          }
-          if((isset($classPanels[$i])) && (is_array($classPanels[$i])))
-          {
-            $sql_classes = array_merge($classPanels[$i], $sql_classes);
-          }
+    if (mysqli_num_rows($res) > 0) {
+        // Recall user configuration
+        $r = mysqli_fetch_array($res);
+        $cid = $r['cid'];
+        $style = $r['style'];
+        $title = stripslashes($r['title']);
+        $titlesize = $r['titlesize'];
+        $titlecolor = $r['titlecolor'];
+        $subtitle = stripslashes($r['subtitle']);
+        $subtitlesize = $r['subtitlesize'];
+        $subtitlecolor = $r['subtitlecolor'];
+        $titleleftpict = $r['titleleftpict'];
+        $titlerightpict = $r['titlerightpict'];
+        $panelscount = $r['panelscount'];
+        
+        for ($i = 1; $i <= NB_PANEL; $i ++) {
+            $panels[$i - 1]->Initialise($r, null, null);
         }
-      }
-      
-      $sql = 'SELECT cls, COUNT(*) AS nb FROM mopcompetitor WHERE cid='.$cid.' AND cls IN('.implode(', ', $sql_classes).') GROUP BY cid, cls';
-      $res = mysqli_query($link, $sql);
-      while($data = mysqli_fetch_array($res))
-      {
-        $arr_cls[$data['cls']] = $data['nb'];
-      }
+        
+        $classPanels = array();
+        $classNamePanels = array();
+        $sql_classes = array(
+            - 1
+        );
+        $coursePanels = array();
+        $courseNamePanels = array();
+        $sql_courses = array(
+            - 1
+        );
+        
+        for ($i = 0; $i < $panelscount; $i ++) {
+            if (($panels[$i]->content == CST_CONTENT_RESULT) || ($panels[$i]->content == CST_CONTENT_SUMMARY) || ($panels[$i]->content == CST_CONTENT_RADIO) || ($panels[$i]->content == CST_CONTENT_START)) {
+                // -----------------------------------------------------------------
+                // Class recollection
+                $sql = "SELECT id FROM resultclass WHERE cid=$cid AND rcid=$rcid AND sid=$screenIndex AND panel=" . ($i + 1);
+                $res = mysqli_query($link, $sql);
+                if (mysqli_num_rows($res) > 0) {
+                    while ($r = mysqli_fetch_array($res)) {
+                        $myid = $r['id'];
+                        $classPanels[$i][] = $myid;
+                        
+                        $sql = "SELECT name FROM mopclass WHERE cid=$cid AND id=$myid";
+                        $resname = mysqli_query($link, $sql);
+                        if (mysqli_num_rows($resname) > 0) {
+                            if ($rname = mysqli_fetch_array($resname)) {
+                                $classNamePanels[$i][] = $rname['name'];
+                            } else {
+                                $classNamePanels[$i][] = $myid;
+                            }
+                        } else {
+                            $classNamePanels[$i][] = $myid;
+                        }
+                    }
+                }
+                if ((isset($classPanels[$i])) && (is_array($classPanels[$i]))) {
+                    $sql_classes = array_merge($classPanels[$i], $sql_classes);
+                }
+            } else { $classPanels[$i][] = -1; $classNamePanels[$i][] = -1; }
+            
+            if ($panels[$i]->content == CST_CONTENT_RESULT_COURSE) {
+                // -----------------------------------------------------------------
+                // Course recollection
+                $sql = "SELECT id FROM resultcourse WHERE cid=$cid AND rcid=$rcid AND sid=$screenIndex AND panel=" . ($i + 1);
+                $res = mysqli_query($link, $sql);
+                if (mysqli_num_rows($res) > 0) {
+                    while ($r = mysqli_fetch_array($res)) {
+                        $myid = $r['id'];
+                        $coursePanels[$i][] = $myid;
+                        
+                        $sql = "SELECT name FROM mopcourse WHERE cid=$cid AND id=$myid";
+                        $resname = mysqli_query($link, $sql);
+                        if (mysqli_num_rows($resname) > 0) {
+                            if ($rname = mysqli_fetch_array($resname)) {
+                                $courseNamePanels[$i][] = $rname['name'];
+                            } else {
+                                $courseNamePanels[$i][] = $myid;
+                            }
+                        } else {
+                            $courseNamePanels[$i][] = $myid;
+                        }
+                    }
+                }
+                if ((isset($coursePanels[$i])) && (is_array($coursePanels[$i]))) {
+                    $sql_courses = array_merge($coursePanels[$i], $sql_courses);
+                }
+            } else { $coursePanels[$i][] = -1; $courseNamePanels[$i][] = -1; }
+            
+            $sql = 'SELECT cls, COUNT(*) AS nb FROM mopcompetitor WHERE cid=' . $cid . ' AND cls IN(' . implode(', ', $sql_classes) . ') GROUP BY cid, cls';
+            $res = mysqli_query($link, $sql);
+            while ($data = mysqli_fetch_array($res)) {
+                $arr_cls[$data['cls']] = $data['nb'];
+            }
+            
+            $sql = 'SELECT crs, COUNT(*) AS nb FROM mopcompetitor WHERE cid=' . $cid . ' AND crs IN(' . implode(', ', $sql_courses) . ') GROUP BY cid, crs';
+            $res = mysqli_query($link, $sql);
+            while ($data = mysqli_fetch_array($res)) {
+                $arr_crs[$data['crs']] = $data['nb'];
+            }
+        }
     }
-  }
+}
+    
 
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -200,7 +234,9 @@
       var displayScrollIndex = [1,1,1,1];
       var rcid;
       var phpTitle;
+      var phpCourseTitle;
       var phpcls;
+      var phpcrs;
       var phpcmpId;
       var phpleg;
       var phpord;
@@ -230,7 +266,9 @@
       { 
 <?php
   defineVariableArrNx("phpTitle", $classNamePanels, $panelscount);
+  defineVariableArrNx("phpCourseTitle", $courseNamePanels, $panelscount);
   defineVariableArrNx("phpcls", $classPanels, $panelscount);
+  defineVariableArrNx("phpcrs", $coursePanels, $panelscount);
   
   defineVariableArr("phpfirstline", $panels[0]->firstline, $panels[1]->firstline, $panels[2]->firstline, $panels[3]->firstline);
   defineVariableArr("phpfixedlines", $panels[0]->fixedlines, $panels[1]->fixedlines, $panels[2]->fixedlines, $panels[3]->fixedlines);
@@ -253,6 +291,7 @@
   defineVariableArr("phpradio", 'finish', 'finish', 'finish', 'finish');
   
   defineVariableArrFromArr("phpnumbercls", $arr_cls);
+  defineVariableArrFromArr("phpnumbercrs", $arr_crs);
   
   defineVariable("screenIndex", $screenIndex);
   defineVariable("rcid", $rcid);
@@ -318,7 +357,7 @@
         }
       break;
       case CST_CONTENT_RESULT:
-        switch($panels[$i]->mode)
+      switch($panels[$i]->mode)
         {
           case CST_MODE_INDIVIDUAL:
             echo 'updateDisplay'.($i+1).'();'."\n";
@@ -353,7 +392,15 @@
           break;
         }
       break;
-      case CST_CONTENT_SUMMARY:
+        case CST_CONTENT_RESULT_COURSE:
+            switch ($panels[$i]->mode) {
+                case CST_MODE_INDIVIDUAL:
+                    echo 'updateDisplayCourse' . ($i + 1) . '();' . "\n";
+                    $bRefreshTable = true;
+                    break;
+            }
+            break;
+        case CST_CONTENT_SUMMARY:
         switch($panels[$i]->mode)
         {
           case CST_MODE_INDIVIDUAL:
@@ -1482,7 +1529,243 @@
         return r;
       } // summaryhtmltablerow
       
-      function ConvertToNiceHtmlTableRow(panelIndex, identifiant, startline, tmcount, panelscount, alternate)
+      function ConvertToNiceCourseHtmlTableRow(panelIndex, startline, tmcount, panelscount, alternate)
+      {
+          var r = "";
+          var ee = 0;
+          var bUpdateNeeded = false;
+          var pos_min_displayable = 0;
+          var pos_max_displayable = 0;
+          var cells_for_tm = 0;
+          var bFoundRadio = false;
+          var pos_recherche = 0;
+          
+          var prefix_class = 'td';
+          var position = startline - 1;
+          if(position <= 0)
+            position = 0;
+          var count = 5;
+          var cells_count = count;
+          if(tmcount === undefined)
+            tmcount = 2;
+
+          prefix_class = 'td_'+panelscount + '_';
+          count = 7+nbradio; //22 pour 15// 11 pour 4, 7+N pour N
+
+          //------ display tabs over result table ----------
+
+          r += '<table class="fixedTable" cellspacing="0" cellpadding="0">\r\n';
+          // affichage du header
+          r += '<thead id="fixedHeader' + panelIndex + '" class="fixedHeader">\r\n';
+          r += '<tr class="normalRow">\r\n';
+          
+          var c;
+          
+          var txt_nb = '';
+          var length=0;
+          if (tableUpdated[panelIndex])
+          {
+            if(dataArray[panelIndex])
+              length = dataArray[panelIndex].length;
+            else
+              length = 0;
+          }
+
+          for(c=0;c<phpTitle[panelIndex].length;c++)
+          {
+            if(courseIndex[panelIndex] == c)
+            {
+                if (typeof (phpnumbercrs[phpcrs[panelIndex][c]]) !== 'undefined')
+                  txt_nb = length + ' / ' + phpnumbercrs[phpcrs[panelIndex][c]];
+                else
+                  txt_nb = length;
+              r += '<th class="activeOnglet">' + phpCourseTitle[panelIndex][c] + ' <br/><span class="number_class">' + txt_nb + '</span></th>\r\n';
+            }
+            else
+            {
+                r += '<th class="inactiveOnglet">' + phpCourseTitle[panelIndex][c] + '</th>\r\n'; // ' <span class="number_class">(' + phpnumbercrs[phpcrs[panelIndex][c]] + ')</span>'
+            }
+          } // end for
+          r += '</tr>\r\n';
+          r += '</thead>\r\n';
+
+
+          //----------- display table header ------------------------
+          var nf = '';
+
+          if (length > 0)
+          {
+            r +='<tbody class="scrollContent">';
+
+            // lignes fixes
+            var endPosition = phpfixedlines[panelIndex] + startline - 1;
+            if (length - startline + 1 < (phpfixedlines[panelIndex] + phpscrolledlines[panelIndex])) // if (length < (phpfixedlines[panelIndex] + phpscrolledlines[panelIndex]))
+            {
+                endPosition = length;
+            }
+            var line = eval(dataArray[panelIndex][0]);
+            
+            //---------------- Fixed part -------------------------------
+            while((position < endPosition) && (position < length))
+            {
+              line = eval(dataArray[panelIndex][position++]);
+              if(line != null)
+              {
+                  if(line[0] < 1)
+                  {
+                    nf = ' nonfini';
+                  }
+                  else
+                  {
+                    nf = '';
+                  }
+                  if(line[1] > nowtime - (60 * phpupdateduration[panelIndex]))
+                  {
+                    nf += ' updated';
+                  }
+                  
+                var cl = ((position % 2) ? 'alternateRow' : 'normalRow');
+                
+                r += '<tr class="' + cl + nf + '">\r\n';
+                //r += generateCells(identifiant,line, count, prefix_class, pos_min_displayable, pos_max_displayable, cells_for_tm,tmcount,bFoundRadio,pos_recherche,panelscount, alternate);
+                r += '</tr>\r\n';
+              }
+            } // end fixed part
+                  
+            //---------------------------- scrolling part -------------------      
+            if (length - startline + 1 >= (phpfixedlines[panelIndex] + phpscrolledlines[panelIndex]))
+            {
+                r += "</tbody>\r\n";
+                r += '</table>\r\n';
+            
+                r += '<hr />';
+                r += '<table class="scrollTable" cellspacing="0" cellpadding="0">\r\n';
+                r += '<tbody class="scrollContent">';
+              
+              var startPosition = displayScrollIndex[panelIndex];
+              var endPosition = startPosition + phpscrolledlines[panelIndex];
+              nf = '';
+
+              for(position = startPosition; position < endPosition; position++)
+              {
+                if (position < length)
+                {
+                  var line = eval(dataArray[panelIndex][position]);
+                  if(line != null)
+                  {
+                    var cl = ((position % 2) ? 'alternateRow' : 'normalRow');
+                    
+                      if(line[0] < 1)
+                      {
+                        nf = ' nonfini';
+                      }
+                      else
+                      {
+                        nf = '';
+                      }
+                      if(line[1] > nowtime - (60 * phpupdateduration[panelIndex]))
+                      {
+                        nf += ' updated';
+                      }
+                    
+                    r += '<tr class="' + cl + nf + '">\r\n';
+                    //r += generateCells(identifiant,line, count, prefix_class, pos_min_displayable, pos_max_displayable, cells_for_tm,tmcount,bFoundRadio,pos_recherche,panelscount,alternate);
+                    r += '</tr>\r\n';
+                  } // end line!=null
+                }
+                else // position >= end ==> empty lines
+                {
+                  var cl = ((position % 2) ? 'alternateRow' : 'normalRow');
+                  nf = '';
+                  r += '<tr class="' + cl + nf + '">\r\n';
+                    count1 = count; //count - 2;
+                  var emptyarr = Array();
+                  var maxempty = count;
+                  for(var inc=0;inc<maxempty;inc++)
+                    emptyarr.push("&nbsp;");
+                  //r += generateCells(identifiant,emptyarr, count1, prefix_class, pos_min_displayable, pos_max_displayable, cells_for_tm,tmcount,bFoundRadio,pos_recherche,panelscount,alternate);
+                  r += '</tr>\r\n';
+                }
+              } // end for
+                
+              if(before_decrement_counter[panelIndex] <= 0)
+              {
+                displayScrollIndex[panelIndex]++;
+              }
+              else
+              {
+                before_decrement_counter[panelIndex]--;
+              }
+              if (displayScrollIndex[panelIndex] > length - (phpscrolledlines[panelIndex]-2))
+              {
+                before_decrement_counter[panelIndex] = phpscrollbeforetime[panelIndex] / phpscrolltime[panelIndex];
+                bUpdateNeeded = true;
+              }
+              r += "</tbody>\r\n";
+              r += '</table>\r\n';
+            } // end of scrolling part
+            else
+            {
+              bUpdateNeeded = true;
+              nf = '';
+                count = count;//count - 2;
+              while(position < startline + (phpfixedlines[panelIndex] + phpscrolledlines[panelIndex]))
+              {
+                position++;
+                var cl = ((position % 2) ? 'alternateRow' : 'normalRow');
+                r += '<tr class="' + cl + nf + '">\r\n';
+                var emptyarr = Array();
+                var maxempty = count;
+                for(var inc=0;inc<maxempty;inc++)
+                  emptyarr.push("&nbsp;");
+                //r += generateCells(identifiant,emptyarr, count, prefix_class, pos_min_displayable, pos_max_displayable, cells_for_tm,tmcount,bFoundRadio,pos_recherche,panelscount,alternate);
+                r += '</tr>\r\n';
+              }
+              r += "</tbody>\r\n";
+              r += '</table>\r\n';
+            }
+          }
+          else // length=0 => empty lines ------------------
+          {
+            r +='<tbody class="scrollContent">';
+            position = 0;
+            nf = '';
+              count = count - 2;
+            while(position < (phpfixedlines[panelIndex] + phpscrolledlines[panelIndex]))
+            {
+              position++;
+              var cl = ((position % 2) ? 'alternateRow' : 'normalRow');
+              r += '<tr class="' + cl + nf + '">\r\n';
+              var emptyarr = Array();
+              var maxempty = count;
+              for(var inc=0;inc<maxempty;inc++)
+                emptyarr.push("&nbsp;");
+              //r += generateCells(identifiant,emptyarr, count, prefix_class, pos_min_displayable, pos_max_displayable, cells_for_tm,tmcount,bFoundRadio,pos_recherche,panelscount,alternate);
+              r += '</tr>\r\n';
+            }
+            r += "</tbody>\r\n";
+            r += '</table>\r\n';
+            bUpdateNeeded = true;
+            after_decrement_counter[panelIndex] = 0;
+          }
+              
+          if(bUpdateNeeded)
+          {
+            after_decrement_counter[panelIndex]--;
+            if(after_decrement_counter[panelIndex] <= 0)
+            {
+              displayScrollIndex[panelIndex] = phpfixedlines[panelIndex] + startline - 1;
+              courseIndex[panelIndex] = (courseIndex[panelIndex] + 1) % phpcrs[panelIndex].length;
+              tableUpdated[panelIndex] = false;
+                updateTable(panelIndex);
+              after_decrement_counter[panelIndex] = phpscrollaftertime[panelIndex] / phpscrolltime[panelIndex];
+            }
+          }
+          
+          return r;
+      }
+      
+    	  function ConvertToNiceHtmlTableRow(panelIndex, identifiant, startline, tmcount, panelscount, alternate)
       {
         
 <?php
@@ -2116,18 +2399,26 @@
         }
         
         function updateDisplay<?php echo ($i+1); ?>()
-        {
-            if(document.getElementById("tableContainer<?php echo ($i); ?>"))
-            {
-<?php
-              $default_identifier = 'result';
-              if($panels[$i]->mode == CST_MODE_SHOWO)
-                $default_identifier = 'showo';
-?>
-                document.getElementById("tableContainer<?php echo ($i); ?>").innerHTML = ConvertToNiceHtmlTableRow(<?php echo ($i); ?>, '<?php echo $default_identifier; ?>', <?php echo $panels[$i]->firstline; ?>,tm_count,<?php echo $panelscount; ?>, <?php echo $panels[$i]->alternate; ?>);
-            }
-        }
-        
+                {
+                    if(document.getElementById("tableContainer<?php echo ($i); ?>"))
+                    {
+        <?php
+                      $default_identifier = 'result';
+                      if($panels[$i]->mode == CST_MODE_SHOWO)
+                        $default_identifier = 'showo';
+        ?>
+                        document.getElementById("tableContainer<?php echo ($i); ?>").innerHTML = ConvertToNiceHtmlTableRow(<?php echo ($i); ?>, '<?php echo $default_identifier; ?>', <?php echo $panels[$i]->firstline; ?>,tm_count,<?php echo $panelscount; ?>, <?php echo $panels[$i]->alternate; ?>);
+                    }
+                }
+                
+        function updateDisplayCourse<?php echo ($i+1); ?>()
+                {
+                    if(document.getElementById("tableContainer<?php echo ($i); ?>"))
+                    {
+                        document.getElementById("tableContainer<?php echo ($i); ?>").innerHTML = ConvertToNiceCourseHtmlTableRow(<?php echo ($i); ?>, <?php echo $panels[$i]->firstline; ?>,tm_count,<?php echo $panelscount; ?>, <?php echo $panels[$i]->alternate; ?>);
+                    }
+                }
+                
 		
 		function updateDisplaySummaries<?php echo ($i+1); ?>()
 		{
@@ -2215,8 +2506,13 @@
                   break;
                 }
               break;
-              case CST_CONTENT_RESULT:
-                switch($panels[$i]->mode)
+              case CST_CONTENT_RESULT_COURSE:
+                    ?>
+                    window.setInterval(updateDisplayCourse<?php echo ($i+1); ?>, phpscrolltime[<?php echo ($i); ?>]*100);
+                    <?php
+                    break;
+               case CST_CONTENT_RESULT:
+                  switch($panels[$i]->mode)
                 {
                   case CST_MODE_INDIVIDUAL:
                     ?>
@@ -2516,7 +2812,8 @@
               echo '</div>'."\n";
             break;
             case CST_CONTENT_RESULT:
-              echo '<div style="float:left;display:inline;min-width:100%;width:100%;" id="tableContainer'.$i.'" class="tableContainer">'."\n";
+            case CST_CONTENT_RESULT_COURSE:
+                echo '<div style="float:left;display:inline;min-width:100%;width:100%;" id="tableContainer'.$i.'" class="tableContainer">'."\n";
               echo '</div>'."\n";
             break;
             case CST_CONTENT_SUMMARY:

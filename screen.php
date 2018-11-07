@@ -148,6 +148,7 @@
     class Panel {
       var $numpanel;
       var $classes;
+      var $courses;
       
       var $content;
       var $mode;
@@ -235,7 +236,7 @@
         $panel = isset($_GET['panel']) ? intval($_GET['panel']) : 0;
         if (($rcid>0)&&($cid>0)&&($sid>0)&&($panel>0))
         {
-            $sql = "DELETE FROM resultclass WHERE rcid='$rcid' AND cid='$cid' AND sid='$sid' AND panel='$panel'";  
+            $sql = "DELETE FROM resultclass WHERE rcid='$rcid' AND cid='$cid' AND sid='$sid' AND panel='$panel'";
             mysqli_query($link, $sql);
         }
     }
@@ -248,11 +249,11 @@
         $panel = isset($_GET['panel']) ? intval($_GET['panel']) : 0;
         if (($cid>0)&&($panel>0))
         {
-            $sql = "DELETE FROM resultclass WHERE rcid='$rcid' AND cid='$cid' AND sid='$sid' AND panel='$panel'";  
+            $sql = "DELETE FROM resultclass WHERE rcid='$rcid' AND cid='$cid' AND sid='$sid' AND panel='$panel'";
             mysqli_query($link, $sql);
             $selclasses = isset($_GET['selclasses']) ? $_GET['selclasses'] : null;
             if ($selclasses !== null)
-            { 
+            {
                 foreach ($selclasses as $i => $id)
                 {
                     $str = "'".$rcid."', ";
@@ -264,14 +265,59 @@
                     $res = mysqli_query($link, $sql);
                 }
             }
-	    $now = time();
-	    $str = "refresh=$now";
-	    $sql = "UPDATE resultscreen SET $str WHERE rcid=$rcid AND sid=$sid";
-	    $res = mysqli_query($link, $sql);
+            $now = time();
+            $str = "refresh=$now";
+            $sql = "UPDATE resultscreen SET $str WHERE rcid=$rcid AND sid=$sid";
+            $res = mysqli_query($link, $sql);
         }
-
+        
     }
-   
+    
+    if ($action == "clearcourses")
+    {
+        $rcid = isset($_GET['rcid']) ? intval($_GET['rcid']) : 0;
+        $cid = isset($_GET['cid']) ? intval($_GET['cid']) : 0;
+        $sid = isset($_GET['sid']) ? intval($_GET['sid']) : 0;
+        $panel = isset($_GET['panel']) ? intval($_GET['panel']) : 0;
+        if (($rcid>0)&&($cid>0)&&($sid>0)&&($panel>0))
+        {
+            $sql = "DELETE FROM resultcourse WHERE rcid='$rcid' AND cid='$cid' AND sid='$sid' AND panel='$panel'";
+            mysqli_query($link, $sql);
+        }
+    }
+    
+    if ($action == "updatecourses")
+    {
+        $rcid = isset($_GET['rcid']) ? intval($_GET['rcid']) : 0;
+        $cid = isset($_GET['cid']) ? intval($_GET['cid']) : 0;
+        $sid = isset($_GET['sid']) ? intval($_GET['sid']) : 0;
+        $panel = isset($_GET['panel']) ? intval($_GET['panel']) : 0;
+        if (($cid>0)&&($panel>0))
+        {
+            $sql = "DELETE FROM resultcourse WHERE rcid='$rcid' AND cid='$cid' AND sid='$sid' AND panel='$panel'";
+            mysqli_query($link, $sql);
+            $selcourses = isset($_GET['selcourses']) ? $_GET['selcourses'] : null;
+            if ($selcourses !== null)
+            {
+                foreach ($selcourses as $i => $id)
+                {
+                    $str = "'".$rcid."', ";
+                    $str = $str."'".$cid."', ";
+                    $str = $str."'".$id."', ";
+                    $str = $str."'".$sid."', ";
+                    $str = $str."'".$panel."'";
+                    $sql = "INSERT INTO resultcourse (rcid, cid, id, sid, panel) VALUES ($str)";
+                    $res = mysqli_query($link, $sql);
+                }
+            }
+            $now = time();
+            $str = "refresh=$now";
+            $sql = "UPDATE resultscreen SET $str WHERE rcid=$rcid AND sid=$sid";
+            $res = mysqli_query($link, $sql);
+        }
+        
+    }
+    
     if ($action==="update")
     {
         if ((isset($_GET['rcid']))&&(isset($_GET['sid'])))
@@ -471,6 +517,7 @@
               $panels[$i-1]->txt=stripslashes($r['panel'.$i.'txt']);
               $panels[$i-1]->html=$r['panel'.$i.'html'];
               $panels[$i-1]->classes=GetClassesAndEntries($rcid, $cid, $sid,$i,$link);
+              $panels[$i-1]->courses=GetCoursesAndEntries($rcid, $cid, $sid,$i,$link);
               $panels[$i-1]->firstClass=GetFirstClass($rcid, $cid, $sid,$i,$link);
               $panels[$i-1]->radioctrl=$r['panel'.$i.'radioctrl'];
             }
@@ -518,7 +565,7 @@
                       print '<td>'.$panels[$i-1]->classes.'</td>';
                       break;
                   case 5:
-                      print '<td class="screen_content"><a href=screenclasses.php?rcid='.$rcid.'&cid='.$cid.'&sid='.$sid.'&panel='.$i.'&ret=1><img src="img/podium.png" title="'.MyGetText(43).'"/></a></td>'; // Results
+                      print '<td class="screen_content"><a href=screenclasses.php?rcid='.$rcid.'&cid='.$cid.'&sid='.$sid.'&panel='.$i.'&ret=1><img src="img/podium.png" title="'.MyGetText(43).'"/></a></td>'; // Results by class
                       print '<td>'.$panels[$i-1]->classes.'</td>';
                       break;
                   case 6:
@@ -540,6 +587,10 @@
                       else
                         $txt = "&nbsp;";
                       print '<td>'.$txt.'</td>';
+                      break;
+                  case 10:
+                      print '<td class="screen_content"><a href=screencourses.php?rcid='.$rcid.'&cid='.$cid.'&sid='.$sid.'&panel='.$i.'&ret=1><img src="img/course.png" title="'.MyGetText(114).'"/></a></td>'; // Results by course
+                      print '<td>'.$panels[$i-1]->courses.'</td>';
                       break;
                   default:
                       print '<td bgcolor=LightGrey> &nbsp; </td>';

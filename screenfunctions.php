@@ -216,30 +216,100 @@
 
   function GetClasses($rcid, $cid, $sid, $panel)
   {
-    $link = ConnectToDB();
-    $sqltmp = "SELECT name,ord FROM resultclass, mopclass WHERE mopclass.cid=resultclass.cid AND mopclass.id=resultclass.id AND mopclass.cid=$cid AND resultclass.rcid=$rcid AND resultclass.panel=$panel AND resultclass.sid=$sid ORDER BY ord";
-    $restmp = mysqli_query($link, $sqltmp);
-    $panelclasses="";
-    
-    if (mysqli_num_rows($restmp) > 0)
-    {
-      while ($rtmp = mysqli_fetch_array($restmp))
+      $link = ConnectToDB();
+      $sqltmp = "SELECT name,ord FROM resultclass, mopclass WHERE mopclass.cid=resultclass.cid AND mopclass.id=resultclass.id AND mopclass.cid=$cid AND resultclass.rcid=$rcid AND resultclass.panel=$panel AND resultclass.sid=$sid ORDER BY ord";
+      $restmp = mysqli_query($link, $sqltmp);
+      $panelclasses="";
+      
+      if (mysqli_num_rows($restmp) > 0)
       {
-        $nametmp=$rtmp['name'];
-        if (strlen($panelclasses)>0)
-        {
-          $panelclasses=$panelclasses." , ".$nametmp;
-        }
-        else
-        {
-          $panelclasses=$nametmp;
-        }
+          while ($rtmp = mysqli_fetch_array($restmp))
+          {
+              $nametmp=$rtmp['name'];
+              if (strlen($panelclasses)>0)
+              {
+                  $panelclasses=$panelclasses.", ".$nametmp;
+              }
+              else
+              {
+                  $panelclasses=$nametmp;
+              }
+          }
       }
-    }
-    return $panelclasses;            
+      return $panelclasses;
   }
   
-    function GetFirstClass($rcid, $cid, $sid, $panel, $link)
+  function GetCourses($rcid, $cid, $sid, $panel)
+  {
+      $link = ConnectToDB();
+      $sqltmp = "SELECT name FROM resultcourse, mopcourse WHERE mopcourse.cid=resultcourse.cid AND mopcourse.id=resultcourse.id AND mopcourse.cid=$cid AND resultcourse.rcid=$rcid AND resultcourse.panel=$panel AND resultcourse.sid=$sid";
+      $restmp = mysqli_query($link, $sqltmp);
+      $panelcourses="";
+      
+      if (mysqli_num_rows($restmp) > 0)
+      {
+          while ($rtmp = mysqli_fetch_array($restmp))
+          {
+              $nametmp=$rtmp['name'];
+              if (strlen($panelcourses)>0)
+              {
+                  $panelcourses=$panelcourses.", ".$nametmp;
+              }
+              else
+              {
+                  $panelcourses=$nametmp;
+              }
+          }
+      }
+      return $panelcourses;
+  }
+  
+  function GetCoursesAndEntries($rcid, $cid, $sid, $panel, $link)
+  {
+      $sqltmp = "SELECT mopcourse.id AS courseid, name FROM resultcourse, mopcourse WHERE ";
+      $sqltmp = $sqltmp."mopcourse.cid=resultcourse.cid AND ";
+      $sqltmp = $sqltmp."mopcourse.id=resultcourse.id AND ";
+      $sqltmp = $sqltmp."mopcourse.cid=$cid AND ";
+      $sqltmp = $sqltmp."resultcourse.rcid=$rcid AND ";
+      $sqltmp = $sqltmp."resultcourse.panel=$panel AND ";
+      $sqltmp = $sqltmp."resultcourse.sid=$sid";
+      $restmp = mysqli_query($link, $sqltmp);
+      
+      $nentry=0;
+      $panelcourses="";
+      if (mysqli_num_rows($restmp) > 0)
+      {
+          while ($rtmp = mysqli_fetch_array($restmp))
+          {
+              $nametmp=$rtmp['name'];
+              if (strlen($panelcourses)>0)
+              {
+                  $panelcourses=$panelcourses.", ".$nametmp;
+              }
+              else
+              {
+                  $panelcourses=$nametmp;
+              }
+              
+              // determines number of entries
+              $courseid = intval($rtmp['courseid']);
+              $sql2 = "SELECT COUNT(*) FROM mopcompetitor WHERE cid=$cid AND crs=$courseid";
+              $res2 = mysqli_query($link, $sql2);
+              if (mysqli_num_rows($res2) > 0)
+              {
+                  if ($r2 = mysqli_fetch_array($res2))
+                  {
+                      $nentry=$nentry+$r2[0];
+                  }
+              }
+          }
+          $panelcourses = "<b>$nentry : </b>".$panelcourses;
+      }
+      return $panelcourses;
+  }
+  
+  
+  function GetFirstClass($rcid, $cid, $sid, $panel, $link)
   {
     $sqltmp = "SELECT mopclass.id AS classid, name, ord FROM resultclass, mopclass WHERE ";
     $sqltmp = $sqltmp."mopclass.cid=resultclass.cid AND ";
@@ -284,7 +354,7 @@
         $nametmp=$rtmp['name'];
         if (strlen($panelclasses)>0)
         {
-          $panelclasses=$panelclasses." , ".$nametmp;
+          $panelclasses=$panelclasses.", ".$nametmp;
         }
         else
         {

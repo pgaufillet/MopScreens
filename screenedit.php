@@ -189,6 +189,7 @@
   class Panel {
     var $numpanel;
     var $classes;
+    var $courses;
     
     var $content;
     var $mode;
@@ -214,7 +215,7 @@
       $this->numpanel = $num;
     }
 
-    function Initialise($r, $cls, $rad = 0)
+    function Initialise($r, $cls, $crs, $rad = 0)
     {
       $this->content=$r['panel'.$this->numpanel.'content'];
       $this->mode = $r['panel'.$this->numpanel.'mode'];
@@ -236,6 +237,7 @@
       $this->radioctrl=$r['panel'.$this->numpanel.'radioctrl'];
       
       $this->classes = $cls;
+      $this->courses = $crs;
     }
     
     function Display()
@@ -371,13 +373,20 @@
       print '<td><input type="text" name="'.$prefix.'startlist" size=64 id="'.$prefix.'content4" readonly value="'.$this->classes.'"></td>';
       print "</tr>\n";
       
-      // Results
+      // Results by class
       print "<tr>\n";
       print "<td>&nbsp;</td>\n";
       print '<td><input type="radio" name="'.$prefix.'content" value="5" id="'.$prefix.'id5">'.MyGetText(43).'</input></td>'; 
       print '<td><input type="text" name="'.$prefix.'results" size=64 id="'.$prefix.'content5" readonly value="'.$this->classes.'"></td>';
       print "</tr>\n";
 
+      // Results by course
+      print "<tr>\n";
+      print "<td>&nbsp;</td>\n";
+      print '<td><input type="radio" name="'.$prefix.'content" value="10" id="'.$prefix.'id10">'.MyGetText(114).'</input></td>';
+      print '<td><input type="text" name="'.$prefix.'resultsbycourse" size=64 id="'.$prefix.'content10" readonly value="'.$this->courses.'"></td>';
+      print "</tr>\n";
+      
       // Summary
       print "<tr>\n";
       print "<td>&nbsp;</td>\n";
@@ -534,7 +543,7 @@
           
           for ($i=1; $i<=NB_PANEL; $i++)
           {
-            $panels[$i-1]->Initialise($r, GetClasses($rcid, $cid, $sid,$i,$link));
+              $panels[$i-1]->Initialise($r, GetClasses($rcid, $cid, $sid,$i,$link), GetCourses($rcid, $cid, $sid,$i,$link));
           }
 
           //---------- files lists creation ----

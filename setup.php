@@ -132,7 +132,20 @@ function setup() {
       KEY `sid` (`sid`)
       ) ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci";
   query($sql);
-
+  
+  $sql = "CREATE TABLE IF NOT EXISTS `resultcourse` (
+      `rcid` int(11) NOT NULL,
+      `cid` int(11) NOT NULL default '0',
+      `id` int(11) NOT NULL,
+      `sid` int(11) NOT NULL,
+      `panel` tinyint(2) NOT NULL default '1',
+      KEY `rcid` (`rcid`),
+      KEY `cid` (`cid`),
+      KEY `id` (`id`),
+      KEY `sid` (`sid`)
+      ) ENGINE = MyISAM CHARACTER SET utf8 COLLATE utf8_general_ci";
+  query($sql);
+  
   $sql = "CREATE TABLE IF NOT EXISTS `resultconfig` (
       `rcid` int(11) NOT NULL,
       `name` varchar(64) character set utf8 NOT NULL,
